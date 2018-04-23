@@ -8,6 +8,7 @@ using namespace std;
 int main(int argc, char* argv[]){
 	
 	pgmImage image;
+	cout << "Image operations are automatically written to open file." << endl;
 
 	while(true){
 		cout << "Enter a Command: " << endl;
@@ -47,8 +48,12 @@ int main(int argc, char* argv[]){
 			image.write_image();
 		}
 		else if(cmd.compare("en") == 0){
-			image.edge_normalize();
+			cout << "Enter Mask Size: " << endl;
+			int size;
+			cin >> size;
+			image.edge_normalize(size);
 			image.write_image();
+			cin.ignore();
 		}
 		else if(cmd.compare("b") == 0){
 			cout << "Enter Size:" << endl;
@@ -56,12 +61,32 @@ int main(int argc, char* argv[]){
 			cin >> size;
 			image.blur(size);
 			image.write_image();
+			cin.ignore();
 		}
 		else if(cmd.compare("p") == 0){
 			image.print_histogram();
 		}
+		else if(cmd.compare("sh") == 0){
+			vector< vector<int> > kernel = {{0,-1,0},{-1,5,-1},{0,-1,0}};
+			image.applyKernel(kernel);
+			image.write_image();
+		}
+		else if(cmd.compare("ed") == 0){
+			vector< vector<int> > kernel = {{-1,-1,-1},{-1,8,-1},{-1,-1,-1}};
+			image.applyKernel(kernel);
+			image.write_image();
+		}
+		else if(cmd.compare("eb") == 0){
+			vector< vector<int> > kernel = {{-2,-1,0},{-1,1,1},{0,1,2}};
+			image.applyKernel(kernel);
+			image.write_image();
+		}
 		else if(cmd.compare("pc") == 0){
 			image.print_cuml_histogram();
+		}
+		else if(cmd.compare("un") == 0){
+			image.undo();
+			image.write_image();
 		}
 		else if(cmd.compare("?") == 0){
 			cout << "Commands:" << endl;
@@ -75,6 +100,10 @@ int main(int argc, char* argv[]){
 			cout << "nor - normalize" << endl;
 			cout << "hor - histogram normalize" << endl;
 			cout << "en  - edge normalize" << endl;
+			cout << "sh  - shapen" << endl;
+			cout << "ed  - edge detect" << endl;
+			cout << "eb  - emboss" << endl;
+			cout << "un  - undo" << endl;
 			cout << "q   - quit" << endl;
 		}
 		else if(cmd.compare("q") == 0){

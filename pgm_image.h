@@ -21,8 +21,9 @@ private:
 	int range;
 
 	std::vector< std::vector<int> > image;
-	std::map<int, long> histogram;
-	std::map<int, long> cuml_histogram;
+	std::vector< std::vector<int> > last_image;
+	std::map<int, double> histogram;
+	std::map<int, double> cuml_histogram;
 
 public:
 	//Constructors
@@ -32,6 +33,7 @@ public:
 	int read_image();
 	int write_image();
 	int write_image(std::string outFile);
+	void undo();
 
 	//Histogram
 	void calculate_histogram();
@@ -44,19 +46,21 @@ public:
 	int readMin();
 	int readMax();
 
-	//Image Flip/Rotate
+	//Image Transforms
 	void flipVert();
 	void flipHorz();
 	void rotateLeft();
 	void rotateRight();
 
-	//Image Manipulation
+	//Image Filters
 	void normalize();
 	void hist_normalize();
 	void edge_normalize(int range=1);
-	void blur(int range=1);
 	void negative();
+	void blur(int range=1);
 
+	//Image Kernels
+	void applyKernel(std::vector< std::vector<int> > kernel);
 
 	//Setters
 	void setName(std::string n){name=n;};

@@ -8,6 +8,7 @@ using namespace std;
 
 pgmImage::pgmImage(){}
 
+//File Operations
 int pgmImage::read_image(){
 	
 	string inFile;
@@ -101,6 +102,15 @@ int pgmImage::write_image(string outFile){
 	return 0;
 }
 
+void pgmImage::undo(){
+	vector< vector<int> > temp;
+	temp = image;
+	image = last_image;
+	last_image = temp;
+	calculate_histogram();
+}
+
+//Image Histogram
 void pgmImage::calculate_histogram(){
 	for(int i = 0; i <= 255; i++){
 		histogram[i] = 0;
@@ -133,6 +143,7 @@ void pgmImage::print_cuml_histogram(){
 	}
 }
 
+//Image Statistics
 double pgmImage::get_mean(int x, int y, int range){
 	double mean = 0.0;
 	double window_size = 0.0;
@@ -178,25 +189,31 @@ int pgmImage::readMax(){
 	return 255;
 }
 
+//Image Transforms
 void pgmImage::flipVert(){
+	last_image = image;
 	reverse(image.begin(), image.end());
 }
 
 void pgmImage::flipHorz(){
+	last_image = image;
 	for(auto& row : image){
 		reverse(row.begin(), row.end());
 	}
 }
 
 void pgmImage::rotateRight(){
-//Todo
+	//Todo
 }
 
 void pgmImage::rotateLeft(){
-//Todo
+	//Todo
 }
 
+//Image Filters
 void pgmImage::normalize(){
+	last_image = image;
+
 	double mi = getMin();
 	double ma = getMax();
 	for(auto& row : image){
@@ -208,6 +225,7 @@ void pgmImage::normalize(){
 }
 
 void pgmImage::hist_normalize(){
+	last_image = image;
 	double mi = getMin();
 	for(auto& row : image){
 		for(auto& pixel : row){
@@ -219,7 +237,7 @@ void pgmImage::hist_normalize(){
 }
 
 void pgmImage::edge_normalize(int range){
-	
+	last_image = image;	
 	vector< vector<int> > edge = image;
 
 	for(int h = 0; h < height; h++){
@@ -233,8 +251,18 @@ void pgmImage::edge_normalize(int range){
 	calculate_histogram();
 }
 
+void pgmImage::negative(){
+	last_image = image;
+	for(auto& row : image){
+		for(auto& pixel : row){
+			pixel = abs(pixel-range);
+		}
+	}
+	calculate_histogram();
+}
+
 void pgmImage::blur(int range){
-	
+	last_image = image;	
 	vector< vector<int> > edge = image;
 
 	for(int h = 0; h < height; h++){
@@ -242,15 +270,32 @@ void pgmImage::blur(int range){
 			edge[h][w] = get_mean(w, h, range);
 		}
 	}
+
 	image = edge;
 	calculate_histogram();
 }
 
-void pgmImage::negative(){
-	for(auto& row : image){
-		for(auto& pixel : row){
-			pixel = abs(pixel-range);
+//Image Kernels
+void pgmImage::applyKernel(vector< vector<int> > kernel){
+	last_image = image;	
+	vector< vector<int> > tmp = image;
+	int maskRange = (kernel.size()-1)/2;
+
+	for(int h = 0; h < height; h++){
+		for(int w = 0; w < width; w++){
+			int newValue = 0;
+
+			for(int y = 0; y < (int)kernel.size(); y++){
+				for(int x = 0; x < (int)kernel.size(); x++){
+					int kern = kernel[y][x];
+					int hI = min(height - 1, max(0, h - y - maskRange));
+					int wI = min(width  - 1, max(0, w - x - maskRange));
+					newValue = newValue + kern * image[hI][wI];
+				}
+			}
+			tmp[h][w] = max(0,min(255,newValue));
 		}
 	}
-	calculate_histogram();
+	image = tmp;
+	calculate_histogram();	
 }
